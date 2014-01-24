@@ -24,6 +24,7 @@
     "matchdep": "~0.3.0",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha-cli": "~1.5.0",
-    "watchify": "~0.5.3"
+    "watchify": "~0.5.3",
+    "chai": "~1.8.1"
   }
 }
