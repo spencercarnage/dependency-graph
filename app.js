@@ -18,6 +18,7 @@ app.configure(function(){
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.join(__dirname, 'node_modules')));
 
   // Setup local variables to be available in the views.
   app.locals.title = "Dependency Manager.";
@@ -31,7 +32,6 @@ app.configure('development', function(){
 
 app.use(function (req, res, next) {
   fs.readFile('./models/dependencies.json', function (err, data) {
-    console.log(err);
     if (err) throw err;
 
     res.locals.dependencies = data;
@@ -45,6 +45,16 @@ app.get('/', function (req, res) {
     if (err) throw err;
 
     res.render('index.ejs', {
+      dependencies: data
+    });
+  });
+});
+
+app.get('/test', function (req, res) {
+  fs.readFile('./models/dependencies.json', function (err, data) {
+    if (err) throw err;
+
+    res.render('test-runner.ejs', {
       dependencies: data
     });
   });

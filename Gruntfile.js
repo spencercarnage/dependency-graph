@@ -13,6 +13,13 @@ var globalConfig = {
 module.exports = function (grunt) {
   grunt.initConfig({
     globalConfig: globalConfig,
+    browserify: {
+      test: {
+        files: {
+          'public/js/build/tests/app-tests.js': 'public/js/tests/app-tests.js'
+        }
+      }
+    },
     mochacli: {
       options: {
         require: ['chai'],
@@ -38,13 +45,26 @@ module.exports = function (grunt) {
         files: ['Gruntfile.js']
       },
       app: {
-        files: 'public/js/build/app.js',
+        files: ['public/js/build/**/*.js'],
         options: {
           livereload: true
         }
       },
+      testApp: {
+        files: [
+          'public/js/tests/app-tests.js',
+          'public/js/tests/views/**/*.js',
+          'public/js/src/**/*.js'
+        ],
+        tasks: ['browserify:test'],
+      },
       mochaFrontEnd: {
-        files: ['public/js/tests/**/*.js','public/js/src/**/*.js'],
+        files: [
+          'public/js/tests/**/*.js',
+          'public/js/src/**/*.js',
+          '!public/js/tests/views/**/*-tests.js',
+          '!public/js/src/views/**/*.js'
+        ],
         tasks: ['mochacli:singleFile'],
         options: {
           spawn: false
@@ -74,8 +94,6 @@ module.exports = function (grunt) {
   grunt.event.on('watch', function (action, filepath, target) {
     if ((action === 'changed' || action === 'added') && 
         (jsFileRE.test(filepath) || jsTestFileRE.test(filepath))) {
-
-      console.log('here');
 
       if (filepath.match(/-tests.js/)) {
         globalConfig.js.srcFile = filepath
