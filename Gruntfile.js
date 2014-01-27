@@ -45,15 +45,19 @@ module.exports = function (grunt) {
         files: ['Gruntfile.js']
       },
       app: {
-        files: ['public/js/build/**/*.js'],
+        files: [
+          'public/js/build/**/*.js',
+          'public/js/build/tests/app-tests.js',
+          'views/**/*.ejs'
+        ],
         options: {
           livereload: true
-        }
+        },
       },
       testApp: {
         files: [
           'public/js/tests/app-tests.js',
-          'public/js/tests/views/**/*.js',
+          'public/js/tests/**/*.js',
           'public/js/src/**/*.js'
         ],
         tasks: ['browserify:test'],
@@ -65,7 +69,7 @@ module.exports = function (grunt) {
           '!public/js/tests/views/**/*-tests.js',
           '!public/js/src/views/**/*.js'
         ],
-        tasks: ['mochacli:singleFile'],
+        //tasks: ['mochacli:singleFile'],
         options: {
           spawn: false
         }
@@ -95,23 +99,23 @@ module.exports = function (grunt) {
     if ((action === 'changed' || action === 'added') && 
         (jsFileRE.test(filepath) || jsTestFileRE.test(filepath))) {
 
-      if (filepath.match(/-tests.js/)) {
-        globalConfig.js.srcFile = filepath
-                                    .replace('tests/', 'src')
-                                    .replace('-tests.js', '.js');
+      //if (filepath.match(/-tests.js/)) {
+      //  globalConfig.js.srcFile = filepath
+      //                              .replace('tests/', 'src')
+      //                              .replace('-tests.js', '.js');
 
-        globalConfig.js.buildFile = filepath
-                                      .replace('tests/', 'build/')
-                                      .replace('-tests.js', '.js');
-                            
-        globalConfig.js.testFile = filepath;
-      } else {
+      //  globalConfig.js.buildFile = filepath
+      //                                .replace('tests/', 'build/')
+      //                                .replace('-tests.js', '.js');
+      //                      
+      //  globalConfig.js.testFile = filepath;
+      //} else {
         globalConfig.js.srcFile = filepath;
         globalConfig.js.buildFile = filepath.replace('src/', 'build/');
         globalConfig.js.testFile = filepath
                                       .replace('src/', '/tests/')
                                       .replace('.js', '-tests.js');
-      }
+      //}
     }
   });
 };

@@ -1,0 +1,39 @@
+<h1>Editing</h1>
+
+<button class="close">Close</button>
+
+<form>
+  <fieldset>
+    <legend>Library Properties</legend>
+
+    <div>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" value="{{name}}">
+    </div>
+      
+    <div>
+      <label for="version">Version:</label>
+      <input type="text" id="version" name="version" value="{{version}}">
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Manage Dependencies</legend>
+
+    <div>
+      <label for="filter">Filter:</label>
+      <input type="text" id="filter" name="filter">
+    </div>
+      
+    <ul class="edit-deps">
+    </ul>
+
+    <div>
+      <label for="add">Add:</label>
+      <input type="text" id="add" name="add">
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <input type="submit" value="Save">
+  </fieldset>

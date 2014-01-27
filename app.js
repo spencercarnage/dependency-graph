@@ -50,6 +50,16 @@ app.get('/', function (req, res) {
   });
 });
 
+app.get('/edit', function (req, res) {
+  fs.readFile('./models/dependencies.json', function (err, data) {
+    if (err) throw err;
+
+    res.render('index.ejs', {
+      dependencies: data
+    });
+  });
+});
+
 app.get('/test', function (req, res) {
   fs.readFile('./models/dependencies.json', function (err, data) {
     if (err) throw err;

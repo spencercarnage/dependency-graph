@@ -1,4 +1,4 @@
-var _ = require('lodash');
+var _ = require('underscore');
 
 /**
  * "Wrangles" nested data structures into proper parent-child relationships

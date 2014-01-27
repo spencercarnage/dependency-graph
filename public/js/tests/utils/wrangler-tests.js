@@ -1,8 +1,5 @@
-var fs = require('fs');
-var data = JSON.parse(fs.readFileSync('./models/dependencies.json').toString());
 var wrangler = require('../../src/utils/wrangler');
-var Backbone = require('backbone');
-var _ = require('lodash');
+var _ = require('underscore');
 var TestModel = Backbone.Model.extend({ defaults: { isChild: false } });
 var TestCollection = Backbone.Collection;
 var GraphModel = require('../../src/models/graph');
@@ -21,7 +18,7 @@ describe('wrangle nested parent-child relationships', function () {
   });
 
   it('should create parent models with kids', function () {
-    var myLib = new GraphModel(data[0]);
+    var myLib = new GraphModel(dependenciesData[0]);
     var myLibDeps = myLib.get('depsCollection');
 
     var backbone = myLibDeps.findWhere({name: 'backbone'});

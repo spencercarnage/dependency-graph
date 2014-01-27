@@ -1,38 +1,150 @@
-var fs = require('fs');
-var data = JSON.parse(fs.readFileSync('./models/dependencies.json').toString());
 var wrangler = require('../../src/utils/wrangler');
-var Backbone = require('backbone');
-var _ = require('lodash');
 var DependenciesCollection = require('../../src/collections/dependencies');
 var GraphModel = require('../../src/models/graph');
 var assert = require('chai').assert;
 
+var mootoolsData = {name: 'mootools', version: '1.4.5'};
+var backboneData = {
+  name: 'backbone',
+  version: '1.0.0',
+  deps: [
+    {name: 'underscore', version: '1.5.0'},
+    {name: 'jquery', version: '1.8.0'}
+  ]
+};
+
 describe('Graph Model', function () {
   before(function () {
-    this.wrangledModels = wrangler(data, GraphModel, DependenciesCollection, 'deps');
   });
 
   beforeEach(function () {
-    this.myLib = new GraphModel(data[0]);
-    this.myLibDeps = this.myLib.get('depsCollection');
+    this.mootools = new GraphModel(mootoolsData);
+    this.backbone = new GraphModel(backboneData);
   });
 
-  it('should build a dep collection for myLib', function () {
-    assert.isNotNull(this.myLibDeps);
-    assert.equal(this.myLibDeps.models.length, 3);
+  afterEach(function () {
+    this.mootools = undefined;
+    this.backbone = undefined;
   });
 
-  it('should remove a dep from the collection for myLib', function () {
-    this.myLib.trigger('removeDeps', this.myLibDeps.findWhere({name: 'backbone'}));
-
-    assert.equal(this.myLib.get('depsCollection').models.length, 2);
-    assert.isUndefined(this.myLibDeps.findWhere({name: 'backbone'}));
+  it('should not build a depsCollection for a library with no deps', function () {
   });
 
-  it('should add a dep to the collection for myLib', function () {
-    this.myLib.trigger('addDeps', {name: 'pluploader', version: '0.3.4'});
+  it('should build a dep collection', function () {
+    var backboneDeps = this.backbone.get('depsCollection');
+    var mootoolsDeps = this.mootools.get('depsCollection');
 
-    assert.equal(this.myLib.get('depsCollection').models.length, 4);
-    assert.isDefined(this.myLibDeps.findWhere({name: 'pluploader'}));
+    assert.isNotNull(mootoolsDeps);
+    assert.isNotNull(backboneDeps);
+    assert.equal(mootoolsDeps.models.length, 0);
+    assert.equal(backboneDeps.models.length, 2);
+  });
+
+  it('should remove 1 dep from the backbone deps collection', function () {
+    var backboneDeps = this.backbone.get('depsCollection');
+    var underscore = backboneDeps.findWhere({name: 'underscore'});
+
+    this.backbone.trigger('removeDeps', underscore);
+
+    assert.equal(
+      backboneDeps.models.length, 
+      1,
+      'backbone depsCollection models should have length of 1'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere({name: 'underscore'}),
+      'findWhere with "underscore" should return undefined'
+    );
+
+    assert.equal(
+      this.backbone.get('deps').length, 
+      1,
+      'model deps attribute should have length of 1'
+    );
+  });
+
+  it('should remove multiple deps from the backbone deps collection, leaving no deps', function () {
+    var backboneDeps = this.backbone.get('depsCollection');
+    var underscore = backboneDeps.findWhere({name: 'underscore'});
+    var jquery = backboneDeps.findWhere({name: 'jquery'});
+
+    this.backbone.trigger('removeDeps', [underscore, jquery]);
+
+    assert.equal(
+      backboneDeps.models.length, 
+      0,
+      'backbone depsCollection models should have length of 0'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere(underscore),
+      'findWhere with "underscore" should return undefined'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere(jquery),
+      'findWhere with "underscore" should return undefined'
+    );
+
+    assert.equal(
+      this.backbone.get('deps').length, 
+      0,
+      'model deps attribute should have length of 0'
+    );
+  });
+
+  it('should remove multiple deps from the backbone deps collection, leaving remaining deps', function () {
+    var backboneDeps = this.backbone.get('depsCollection');
+    var someLib = backboneDeps.add({name: 'some lib', version: '0.0.1'});
+    var underscore = backboneDeps.findWhere({name: 'underscore'});
+    var jquery = backboneDeps.findWhere({name: 'jquery'});
+
+    this.backbone.trigger('removeDeps', [underscore, jquery]);
+
+    assert.equal(
+      backboneDeps.models.length, 
+      1,
+      'backbone depsCollection models should have length of 1'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere(underscore),
+      'findWhere with "underscore" should return undefined'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere(jquery),
+      'findWhere with "underscore" should return undefined'
+    );
+
+    assert.isUndefined(
+      backboneDeps.findWhere(someLib),
+      'findWhere with "someLib" should be defined'
+    );
+
+    assert.equal(
+      this.backbone.get('deps').length, 
+      1,
+      'model deps attribute should have length of 1'
+    );
+  });
+
+  it('should add a dep to the collection for backbone deps', function () {
+    var backboneDeps = this.backbone.get('depsCollection');
+
+    this.backbone.trigger('addDeps', {name: 'pluploader', version: '0.3.4'});
+
+    assert.equal(backboneDeps.models.length, 3);
+    assert.isDefined(backboneDeps.findWhere({name: 'pluploader'}));
+  });
+
+  it('should add a dep to a dep-less library', function () {
+    this.mootools.trigger('addDeps', {name: 'MooTools More', version: '0.5.0'});
+                        
+    assert.isNotNull(this.mootools.get('depsCollection'));
+    console.log(this.mootools.get('deps'));
+    console.log(this.mootools.get('depsCollection').models.length);
+    assert.equal(this.mootools.get('depsCollection').models.length, 1);
   });
 });

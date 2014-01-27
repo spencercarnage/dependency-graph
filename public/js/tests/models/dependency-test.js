@@ -1,4 +1,4 @@
-var _ = require('lodash');
+var _ = require('underscore');
 var DependencyModel = require('../../src/model/dependency');
 
 describe('Dependency Model', function () {

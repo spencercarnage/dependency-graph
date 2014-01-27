@@ -1,5 +1,5 @@
+var _ = require('underscore');
 var Backbone = require('backbone');
-var _ = require('lodash');
 var DependencyModel = require('../models/dependency');
 
 var DependenciesCollection = Backbone.Collection.extend({
