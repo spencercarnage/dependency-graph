@@ -1,13 +1,14 @@
-window.$ = require('jquery');
-var _ = require('underscore');
+window.$ = window.jQuery = require('jquery');
+window._ = require('underscore');
 
 // mustache style templates
 _.templateSettings = {
   interpolate : /\{\{(.+?)\}\}/g
 };
 
-var Backbone = require('backbone');
+window.Backbone = require('backbone');
 Backbone.$ = window.$;
+require('../vendor/backbone.autocomplete');
 var wrangler = require('./utils/wrangler');
 var AppView = require('./views/app');
 var GraphView = require('./views/graph');
@@ -49,7 +50,7 @@ var Router = Backbone.Router.extend({
     _.each(dependenciesData, function (data, i) {
       var graphView = new GraphView({
         model: new GraphModel(data)
-      })
+      });
       
       $app.html(graphView.$el);
 
@@ -73,7 +74,8 @@ function Controller() {
       }
 
       App.EditView = new EditView({
-        model: new EditModel(data)
+        model: new GraphModel(data)
+        //model: new EditModel(data)
       });
       
       $app.html(App.EditView.$el);

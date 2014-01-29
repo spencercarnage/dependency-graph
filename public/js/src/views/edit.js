@@ -3,12 +3,14 @@ var _ = require('underscore');
 var EditModel = require('../models/edit');
 var EditDepsModel = require('../models/edit-deps');
 var EditDepsView = require('./edit-deps');
+var GraphModel = require('../models/graph');
 
 var EditView = Backbone.View.extend({
   className: 'edit-view',
 
   events: {
-    'click .close': 'close'
+    'click .close': 'close',
+    'keyup #filter': 'filter'
   },
 
   initialize: function () {
@@ -27,7 +29,8 @@ var EditView = Backbone.View.extend({
     if (typeof deps !== 'undefined') {
       _.each(deps, function (dep, i) {
         var editDepsView = new EditDepsView({
-          model: new EditDepsModel(dep)
+          id: dep.name + '-' + dep.version.replace(/\./g, '-'),
+          model: new GraphModel(dep)
         });
         
         editDepsView.$el.appendTo(this.$el.find('.edit-deps'));
@@ -49,6 +52,32 @@ var EditView = Backbone.View.extend({
     this.remove();
 
     App.Router.navigate('', {trigger:true});
+  },
+
+  filter: function (event) {
+    var depsCollection = this.model.get('depsCollection');
+    var filterValue = this.$el.find('#filter').val().toLowerCase();
+    var results = [];
+
+    _.each(depsCollection.models, function (dep) {
+      if (dep.get('name').match(filterValue)) {
+        results.push('#' + dep.get('name').toLowerCase() + '-' + dep.get('version').replace(/\./g, '-'));
+      } else if (dep.get('version').match(filterValue)) {
+        results.push('#' + dep.get('name').toLowerCase() + '-' + dep.get('version').replace(/\./g, '-'));
+      }
+    });
+
+    if (results) {
+      this.$el.find('.edit-deps-item').hide();
+
+      _.each(results, function (result) {
+        this.$el.find(result).show();
+      }, this);
+    }
+
+    if (filterValue === '') {
+      this.$el.find('.edit-deps-item').show();
+    }
   }
 });
 
