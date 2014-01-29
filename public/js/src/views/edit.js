@@ -3,7 +3,7 @@ var _ = require('underscore');
 var EditModel = require('../models/edit');
 var EditDepsModel = require('../models/edit-deps');
 var EditDepsView = require('./edit-deps');
-var GraphModel = require('../models/graph');
+var DepModel = require('../models/dependency');
 
 var EditView = Backbone.View.extend({
   className: 'edit-view',
@@ -30,7 +30,7 @@ var EditView = Backbone.View.extend({
       _.each(deps, function (dep, i) {
         var editDepsView = new EditDepsView({
           id: dep.name + '-' + dep.version.replace(/\./g, '-'),
-          model: new GraphModel(dep)
+          model: new DepModel(dep)
         });
         
         editDepsView.$el.appendTo(this.$el.find('.edit-deps'));

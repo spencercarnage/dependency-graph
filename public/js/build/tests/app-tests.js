@@ -8472,35 +8472,39 @@ Library.prototype.test = function (obj, type) {
 },{}],36:[function(require,module,exports){
 var _ = require('underscore');
 var Backbone = require('backbone');
-var DependencyModel = require('../models/dependency');
+var DepModel = require('../models/dependency');
 
 var DependenciesCollection = Backbone.Collection.extend({
-  model: DependencyModel
+  model: DepModel
 });
 
 module.exports = DependenciesCollection;
 
-},{"../models/dependency":37,"backbone":1,"underscore":35}],37:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
+},{"../models/dependency":39,"backbone":1,"underscore":35}],37:[function(require,module,exports){
+var DepModel = require('../models/dependency');
 
-module.exports = Backbone.Model.extend({
-  defaults: {
-    isChild: false,
-    parentCid: null
-  },
-  initialize: function () {
-    //console.log(this.attributes);
-  }
+module.exports = Backbone.Collection.extend({
+  model: DepModel
 });
 
+},{"../models/dependency":39}],38:[function(require,module,exports){
+module.exports = {
+  renderDependency: function (DepModel, DepView, parentModel, parentView) {
+    var graphItemView = new DepView({
+      //el: parentView.$el.children('ul').eq(0),
+      model: DepModel
+    }).$el.appendTo(parentView.$el.children('ul').eq(0));
 
-},{"backbone":1,"underscore":35}],38:[function(require,module,exports){
+    parentView.dependenciesViews.push(graphItemView);
+  }
+};
+
+},{}],39:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
-var DependenciesCollection = require('../collections/dependencies');
+//var DependenciesCollection = require('../collections/dependencies');
 
-var GraphModel = Backbone.Model.extend({
+var DepModel = Backbone.Model.extend({
   url: '/api/dependencies',
 
   defaults: {
@@ -8523,20 +8527,28 @@ var GraphModel = Backbone.Model.extend({
 
   },
 
+  /**
+   * Add dependencies to the model's dependencies collection
+   */
   addDeps: function (deps) {
-    //this.set('deps', modelDeps);
     this.get('depsCollection').add(deps);
     this.set('deps', this.cleanDeps());
   },
 
+  /**
+   * Remove dependencies to the model's dependencies collection
+   */
   removeDeps: function (deps) {
     this.get('depsCollection').remove(deps);
     this.set('deps', this.cleanDeps());
   },
 
+  /**
+   * Create this model's dependencies collection.
+   */
   createDeps: function () {
-    this.set('depsCollection', new DependenciesCollection(this.get('deps'), {
-      model: GraphModel
+    this.set('depsCollection', new Backbone.Collection(this.get('deps'), {
+      model: DepModel
     }));
 
     return this;
@@ -8549,70 +8561,207 @@ var GraphModel = Backbone.Model.extend({
   }
 });
 
-module.exports = GraphModel;
+module.exports = DepModel;
 
-},{"../collections/dependencies":36,"backbone":1,"underscore":35}],39:[function(require,module,exports){
+
+},{"backbone":1,"underscore":35}],40:[function(require,module,exports){
+var Backbone = require('backbone');
 var _ = require('underscore');
+var LeafView= require('./dependency-leaf');
+var DepModel = require('../models/dependency');
 
-/**
- * "Wrangles" nested data structures into proper parent-child relationships
- * @param {Object} data Nested data object
- * @param {Object} model Model used for creating the parent and child
- * @param {Object} childCollection Collection used for child models
- * @param {String} childKey Name of key used on data arg for indicating the
- *                          array of children 
- * @param {Object} parent Optional parent model for the child
- */
-function wrangle(data, Model, ChildCollection, childKey, parent) {
-  var wrangled = [];
-  var parentCount = 0;
-  var childCount = 0;
+module.exports = Backbone.View.extend({
+  tagName: 'ul',
+  
+  className: 'dependency-branch',
 
-  wrangled = _.map(data, function (item, i) {
-    var model = new Model(item);
-    var children;
+  initialize: function (options) {
+    options = options || {};
 
-    if (typeof parent !== 'undefined') {
-      parentCount++;
-      model.set('isChild', true);
-      model.set('parentCid', parent.cid);
-
-      parent.get(childKey + 'Collection').add(model);
+    if (typeof options.leavesCollection !== 'undefined') {
+      this.leavesCollection = options.leavesCollection;
     }
 
-    if (_.isArray(item[childKey])) {
-      children = new ChildCollection({
-        model: Model
+    this.render();
+
+    return this;
+  },
+
+  leafViews: [],
+
+  leavesCollection: null,
+
+  render: function () {
+    if (!_.isNull(this.leavesCollection)) {
+      _.each(this.leavesCollection.models, function (leafModel) {
+        console.log(leafModel.attributes);
+        var leafView = new LeafView({
+          model: leafModel
+        });
+        
+        leafView.$el.appendTo(this.$el);
+
+        this.leafViews.push(leafView);
+      }, this);
+    }
+
+    return this;
+  },
+
+  close: function () {
+    if (this.leafViews.length) {
+      _.each(this.leafViews, function (leafView) {
+        console.log('close', leafView.model.get('name'));
+        leafView.close();
+      });
+    }
+
+    //this.remove();
+  }
+});
+
+},{"../models/dependency":39,"./dependency-leaf":41,"backbone":1,"underscore":35}],41:[function(require,module,exports){
+var Backbone = require('backbone');
+var _ = require('underscore');
+var renderDepMixin = require('../mixins/render-dependencies');
+var DepModel = require('../models/dependency');
+
+var LeafView = Backbone.View.extend({
+  events: {
+    'click > .view-deps': 'viewDeps',
+    'click > .dep-info': 'edit'
+  },
+
+  tagName: 'li',
+  
+  className: 'dependency-leaf',
+
+  template: _.template("<a href='/edit' class='edit-dep'>{{name}} {{version}}</a>"),
+
+  leafViews: [],
+
+  branchViews: [],
+
+  initialize: function () {
+    this.render();
+
+    return this;
+  },
+
+  render: function () {
+    var depsCollection = this.model.get('depsCollection');
+
+    // Require the branch view here so we don't have issues with circular
+    // deps returning empty objects
+    var DepBranchView = require('./dependency-branch');
+
+    this.$el.html(this.template(this.model.toJSON()));
+
+    if (depsCollection.length) {
+      this.$el.prepend('<button class="view-deps">view dependencies</button>');
+
+      console.log('branch');
+      var branchView = new DepBranchView({
+        model: new DepModel(this.model.toJSON())
       });
 
-      children.reset();
+      branchView.$el.appendTo(this.$el); 
+      this.branchViews.push(branchView);
 
-      model.set(childKey + 'Collection', children);
+      _.each(depsCollection.models, function(leafModel) {
+        console.log('leaf');
+        var leafView = new LeafView({
+          model: new DepModel(leafModel.toJSON())
+        });
 
-      children.add(wrangle(item[childKey], Model, ChildCollection, childKey, model));
+        leafView.$el.appendTo(branchView.$el);
+
+        this.leafViews.push(leafView);
+      }, this);
+
+      //branchView.$el.appendTo(this.$el);
+      //this.branchViews.push(branchView);
+
+      //_.each(depsCollection.models, function (depModel, i) {
+      //  //if (depModel.get('depsCollection').length) {
+
+      //  //} else {
+      //    console.log('leaf');
+      //    var leafView = new LeafView({
+      //      model: new DepModel(depModel.toJSON())
+      //    });
+
+      //    console.log(leafView.$el);
+      //    leafView.$el.appendTo(this.$el);
+
+      //    this.leafViews.push(leafView);
+      //  //}
+      //}, this);
     }
-    
-    return model;
-  });
 
-  return wrangled;
-}
+    return this;
+  },
 
-module.exports = wrangle;
+  hasChildUL: function () {
+    return this.$el.children('ul').length;
+  },
 
-},{"underscore":35}],40:[function(require,module,exports){
+  viewDeps: function (event) {
+    var deps = this.model.get('depsCollection');
+
+    _.each(deps.models, function (dep, i) {
+      //console.log(dep.get('name'));
+    });
+  },
+
+  edit: function (event) {
+    event.preventDefault();
+
+    var editData = {
+      name: this.model.get('name'),
+      version: this.model.get('version'),
+      deps: this.model.get('deps')
+    };
+
+    App.Vent.trigger('edit:show', editData);
+  },
+  close: function () {
+    console.log(this.model.get('name'), this.leafViews.length);
+    /*
+    if (this.leafViews.length) {
+      _.each(this.leafViews, function (leafView, i) {
+        console.log('close', leafView.model.get('name'));
+        leafView.close();
+      });
+    }
+    */
+
+    //console.log('close', this.model.get('name'));
+    //this.remove();
+  }
+});
+
+_.extend(LeafView.prototype, renderDepMixin);
+
+module.exports = LeafView;
+
+},{"../mixins/render-dependencies":38,"../models/dependency":39,"./dependency-branch":40,"backbone":1,"underscore":35}],42:[function(require,module,exports){
 window._ = require('underscore');
 window.Backbone = require('backbone');
 Backbone.$ = jQuery;
 
-require('./models/graph-tests');
-//require('./views/graph-view-tests');
+// mustache style templates
+_.templateSettings = {
+  interpolate : /\{\{(.+?)\}\}/g
+};
 
-},{"./models/graph-tests":41,"backbone":1,"underscore":35}],41:[function(require,module,exports){
-var wrangler = require('../../src/utils/wrangler');
-var DependenciesCollection = require('../../src/collections/dependencies');
-var GraphModel = require('../../src/models/graph');
+require('./models/dependency-tests');
+require('./views/dependency-branch-tests');
+
+},{"./models/dependency-tests":43,"./views/dependency-branch-tests":44,"backbone":1,"underscore":35}],43:[function(require,module,exports){
 var assert = require('chai').assert;
+var DependenciesCollection = require('../../src/collections/dependencies');
+var DepModel = require('../../src/models/dependency');
 
 var mootoolsData = {name: 'mootools', version: '1.4.5'};
 var backboneData = {
@@ -8624,13 +8773,10 @@ var backboneData = {
   ]
 };
 
-describe('Graph Model', function () {
-  before(function () {
-  });
-
+describe('Dependency Model', function () {
   beforeEach(function () {
-    this.mootools = new GraphModel(mootoolsData);
-    this.backbone = new GraphModel(backboneData);
+    this.mootools = new DepModel(mootoolsData);
+    this.backbone = new DepModel(backboneData);
   });
 
   afterEach(function () {
@@ -8760,4 +8906,78 @@ describe('Graph Model', function () {
   });
 });
 
-},{"../../src/collections/dependencies":36,"../../src/models/graph":38,"../../src/utils/wrangler":39,"chai":5}]},{},[40])
+},{"../../src/collections/dependencies":36,"../../src/models/dependency":39,"chai":5}],44:[function(require,module,exports){
+var assert = require('chai').assert;
+var DepModel = require('../../src/models/dependency');
+var DepBranchView = require('../../src/views/dependency-branch');
+var DepLeafView = require('../../src/views/dependency-leaf');
+var LeavesCollection = require('../../src/collections/leaves');
+
+var mootoolsData = {name: 'mootools', version: '1.4.5'};
+var backboneData = {
+  name: 'backbone',
+  version: '1.0.0',
+  deps: [
+    {name: 'underscore', version: '1.5.0'},
+    {name: 'jquery', version: '1.8.0'}
+  ]
+};
+
+function setup() {
+  this.mootoolsBranch = new DepBranchView({
+    leavesCollection: new LeavesCollection(mootoolsData),
+    model: new DepModel(mootoolsData)
+  });
+
+  this.backboneBranch = new DepBranchView({
+    leavesCollection: new LeavesCollection(backboneData),
+    model: new DepModel(backboneData)
+  });
+}
+
+function teardown() {
+  this.mootoolsBranch = undefined;
+  this.backboneBranch = undefined;
+}
+
+describe('Branch View', function () {
+  beforeEach(function () {
+    setup.call(this);
+  });
+
+  it("should render the MooTools Branch", function () {
+    assert.equal(
+      $('<div>').append(this.mootoolsBranch.$el.clone()).html(),
+      '<ul class="dependency-branch">' + 
+        '<li class="dependency-leaf">' +
+          '<a href="/edit" class="edit-dep">mootools 1.4.5</a>' +
+        '</li>' +
+      '</ul>',
+      "Assert branch markup"
+    );
+  });
+
+  it("should render the Backbone dependency leaf", function () {
+    assert.equal(
+      $('<div>').append(this.backboneBranch.$el.clone()).html(),
+      '<ul class="dependency-branch">' +
+        '<li class="dependency-leaf">' +
+          '<button class="view-deps">view dependencies</button>' +
+          '<a href="/edit" class="edit-dep">backbone 1.0.0</a>' +
+          '<ul class="dependency-branch">' +
+            '<li class="dependency-leaf">' +
+              '<a href="/edit" class="edit-dep">underscore 1.5.0</a>' +
+            '</li>' + 
+            '<li class="dependency-leaf">' +
+              '<a href="/edit" class="edit-dep">jquery 1.8.0</a>' +
+            '</li>' + 
+          '</ul>' + 
+        '</li>' +
+      '</ul>',
+      "Should render a LI leaf for Backbone with child UL branches"
+    );
+  });
+});
+
+
+},{"../../src/collections/leaves":37,"../../src/models/dependency":39,"../../src/views/dependency-branch":40,"../../src/views/dependency-leaf":41,"chai":5}]},{},[42])

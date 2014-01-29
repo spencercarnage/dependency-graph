@@ -2,5 +2,10 @@ window._ = require('underscore');
 window.Backbone = require('backbone');
 Backbone.$ = jQuery;
 
-require('./models/graph-tests');
-//require('./views/graph-view-tests');
+// mustache style templates
+_.templateSettings = {
+  interpolate : /\{\{(.+?)\}\}/g
+};
+
+require('./models/dependency-tests');
+require('./views/dependency-branch-tests');

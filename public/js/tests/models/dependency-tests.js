@@ -1,7 +1,6 @@
-var wrangler = require('../../src/utils/wrangler');
-var DependenciesCollection = require('../../src/collections/dependencies');
-var GraphModel = require('../../src/models/graph');
 var assert = require('chai').assert;
+var DependenciesCollection = require('../../src/collections/dependencies');
+var DepModel = require('../../src/models/dependency');
 
 var mootoolsData = {name: 'mootools', version: '1.4.5'};
 var backboneData = {
@@ -13,13 +12,10 @@ var backboneData = {
   ]
 };
 
-describe('Graph Model', function () {
-  before(function () {
-  });
-
+describe('Dependency Model', function () {
   beforeEach(function () {
-    this.mootools = new GraphModel(mootoolsData);
-    this.backbone = new GraphModel(backboneData);
+    this.mootools = new DepModel(mootoolsData);
+    this.backbone = new DepModel(backboneData);
   });
 
   afterEach(function () {

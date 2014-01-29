@@ -1,9 +1,9 @@
 var _ = require('underscore');
 var Backbone = require('backbone');
-var DependencyModel = require('../models/dependency');
+var DepModel = require('../models/dependency');
 
 var DependenciesCollection = Backbone.Collection.extend({
-  model: DependencyModel
+  model: DepModel
 });
 
 module.exports = DependenciesCollection;

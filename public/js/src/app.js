@@ -8,28 +8,26 @@ _.templateSettings = {
 
 window.Backbone = require('backbone');
 Backbone.$ = window.$;
-require('../vendor/backbone.autocomplete');
-var wrangler = require('./utils/wrangler');
+//require('../vendor/backbone.marionette');
 var AppView = require('./views/app');
-var GraphView = require('./views/graph');
-var GraphModel = require('./models/graph');
+var DepTreeView = require('./views/dependency-branch');
+var Leaves = require('./collections/leaves');
+//var TreeView = require('./views/tree');
+//var TreeRoot = require('./views/tree-root');
+//var TreeNodeCollection = require('./collections/tree-node');
+var DepModel = require('./models/dependency');
 var EditView = require('./views/edit');
 var EditModel = require('./models/edit');
 var DependenciesCollection = require('./collections/dependencies');
 var DependencyModel = require('./models/dependency');
-var graphView;
+var depTreeView;
 var models = {};
 var $app;
 window.App = {};
 
-App.Dependencies = wrangler(
-  dependenciesData, 
-  DependencyModel, 
-  DependenciesCollection, 
-  'deps'
-); 
-
-App.GraphViews = [];
+App.Branches = [];
+App.DepTreeViews = [];
+App.TreeViews = [];
 
 App.Vent = _.extend({}, Backbone.Events);
 
@@ -47,15 +45,31 @@ var Router = Backbone.Router.extend({
   },
 
   index: function () {
-    _.each(dependenciesData, function (data, i) {
-      var graphView = new GraphView({
-        model: new GraphModel(data)
-      });
-      
-      $app.html(graphView.$el);
+    //var treeCollection = new TreeNodeCollection(dependenciesData);
 
-      App.GraphViews.push(graphView);
-    }, this);
+    //var treeview = new treeroot({
+    //  collection: treecollection
+    //});
+
+    //treeview.render();
+    //
+    //$app.html(treeview.$el);
+
+    //app.treeview = treeview;
+    var branches = new DependenciesCollection(dependenciesData);
+
+    $app.html('');
+
+    _.each(branches.models, function (branch) {
+      console.log('branch', branch.get('name'));
+      var depTree = new DepTreeView({
+        model: new DepModel(branch)
+      });
+
+      depTree.render();
+
+      $app.append(depTree.$el);
+    });
   },
 
   edit: function (data) {
@@ -66,15 +80,8 @@ var Router = Backbone.Router.extend({
 function Controller() {
   this.edit = function (data) {
     if (typeof data !== 'undefined') {
-      console.log(App.GraphViews);
-      if (App.GraphViews.length) {
-        _.each(App.GraphViews, function (graphView) {
-          graphView.close();
-        });
-      }
-
       App.EditView = new EditView({
-        model: new GraphModel(data)
+        model: new DepModel(data)
         //model: new EditModel(data)
       });
       

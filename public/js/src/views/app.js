@@ -1,7 +1,7 @@
 var Backbone = require('backbone');
 var _ = require('underscore');
-var GraphView = require('./graph');
-var GraphModel = require('../models/graph');
+var DepTreeView = require('./dependency-branch');
+var DepModel = require('../models/dependency');
 
 var AppView = Backbone.View.extend({
   el: '#app',
