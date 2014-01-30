@@ -27,7 +27,6 @@ module.exports = Backbone.View.extend({
   render: function () {
     if (!_.isNull(this.leavesCollection)) {
       _.each(this.leavesCollection.models, function (leafModel) {
-        console.log(leafModel.attributes);
         var leafView = new LeafView({
           model: leafModel
         });
@@ -44,7 +43,6 @@ module.exports = Backbone.View.extend({
   close: function () {
     if (this.leafViews.length) {
       _.each(this.leafViews, function (leafView) {
-        console.log('close', leafView.model.get('name'));
         leafView.close();
       });
     }

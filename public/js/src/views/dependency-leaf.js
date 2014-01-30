@@ -6,18 +6,18 @@ var DepModel = require('../models/dependency');
 var LeafView = Backbone.View.extend({
   events: {
     'click > .view-deps': 'viewDeps',
-    'click > .dep-info': 'edit'
+    'click > .edit-dep': 'edit'
   },
 
   tagName: 'li',
   
   className: 'dependency-leaf',
 
-  template: _.template("<a href='/edit' class='edit-dep'>{{name}} {{version}}</a>"),
+  template: _.template("<a href='/edit' class='edit-dep'><span class='dep-name'>{{name}}</span> <span class='dep-version'>{{version}}</span></a>"),
 
   leafViews: [],
 
-  branchViews: [],
+  branchViews: null,
 
   initialize: function () {
     this.render();
@@ -30,50 +30,50 @@ var LeafView = Backbone.View.extend({
 
     // Require the branch view here so we don't have issues with circular
     // deps returning empty objects
-    var DepBranchView = require('./dependency-branch');
 
     this.$el.html(this.template(this.model.toJSON()));
 
     if (depsCollection.length) {
+      var DepBranchView = require('./dependency-branch');
+
       this.$el.prepend('<button class="view-deps">view dependencies</button>');
 
-      console.log('branch');
       var branchView = new DepBranchView({
         model: new DepModel(this.model.toJSON())
       });
 
       branchView.$el.appendTo(this.$el); 
-      this.branchViews.push(branchView);
+
+      this.branchView = branchView;
 
       _.each(depsCollection.models, function(leafModel) {
-        console.log('leaf');
         var leafView = new LeafView({
           model: new DepModel(leafModel.toJSON())
         });
 
+        console.log(leafView.model.cid);
+
         leafView.$el.appendTo(branchView.$el);
+
+        leafView.model.on('change:name', function (model, name) {
+          this.$('.dep-name').html(name);
+        }, leafView);
+
+        leafView.model.on('change:version', function (model, version) {
+          this.$('.dep-version').html(version);
+        }, leafView);
+
+        leafView.model.on('removeDeps', function (deps) {
+          branchView.model.removeDeps(deps);
+        }, leafView);
+
+        leafView.model.on('edit:save', function (changes) {
+          this.model.set(changes);
+        }, leafView);
 
         this.leafViews.push(leafView);
       }, this);
 
-      //branchView.$el.appendTo(this.$el);
-      //this.branchViews.push(branchView);
-
-      //_.each(depsCollection.models, function (depModel, i) {
-      //  //if (depModel.get('depsCollection').length) {
-
-      //  //} else {
-      //    console.log('leaf');
-      //    var leafView = new LeafView({
-      //      model: new DepModel(depModel.toJSON())
-      //    });
-
-      //    console.log(leafView.$el);
-      //    leafView.$el.appendTo(this.$el);
-
-      //    this.leafViews.push(leafView);
-      //  //}
-      //}, this);
     }
 
     return this;
@@ -100,21 +100,7 @@ var LeafView = Backbone.View.extend({
       deps: this.model.get('deps')
     };
 
-    App.Vent.trigger('edit:show', editData);
-  },
-  close: function () {
-    console.log(this.model.get('name'), this.leafViews.length);
-    /*
-    if (this.leafViews.length) {
-      _.each(this.leafViews, function (leafView, i) {
-        console.log('close', leafView.model.get('name'));
-        leafView.close();
-      });
-    }
-    */
-
-    //console.log('close', this.model.get('name'));
-    //this.remove();
+    App.Vent.trigger('edit:show', this.model);
   }
 });
 

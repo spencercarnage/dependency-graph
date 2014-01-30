@@ -8,13 +8,10 @@ _.templateSettings = {
 
 window.Backbone = require('backbone');
 Backbone.$ = window.$;
-//require('../vendor/backbone.marionette');
+
 var AppView = require('./views/app');
 var DepTreeView = require('./views/dependency-branch');
 var Leaves = require('./collections/leaves');
-//var TreeView = require('./views/tree');
-//var TreeRoot = require('./views/tree-root');
-//var TreeNodeCollection = require('./collections/tree-node');
 var DepModel = require('./models/dependency');
 var EditView = require('./views/edit');
 var EditModel = require('./models/edit');
@@ -22,6 +19,8 @@ var DependenciesCollection = require('./collections/dependencies');
 var DependencyModel = require('./models/dependency');
 var depTreeView;
 var models = {};
+var $tree;
+var $edit;
 var $app;
 window.App = {};
 
@@ -56,20 +55,28 @@ var Router = Backbone.Router.extend({
     //$app.html(treeview.$el);
 
     //app.treeview = treeview;
-    var branches = new DependenciesCollection(dependenciesData);
 
-    $app.html('');
+    App.Vent.off('edit:save');
 
-    _.each(branches.models, function (branch) {
-      console.log('branch', branch.get('name'));
+    if (typeof App.Tree === 'undefined') {
+      var branches = new DependenciesCollection(dependenciesData);
+
       var depTree = new DepTreeView({
-        model: new DepModel(branch)
+        leavesCollection: branches
       });
 
       depTree.render();
 
-      $app.append(depTree.$el);
-    });
+      App.Tree = depTree;
+
+      $tree.append(depTree.$el);
+
+      $edit.hide();
+      $tree.show();
+    } else {
+      $edit.hide();
+      $tree.show();
+    }
   },
 
   edit: function (data) {
@@ -78,14 +85,22 @@ var Router = Backbone.Router.extend({
 });
 
 function Controller() {
-  this.edit = function (data) {
-    if (typeof data !== 'undefined') {
+  this.edit = function (model) {
+    if (typeof model !== 'undefined') {
+      $tree.hide();
+
       App.EditView = new EditView({
-        model: new DepModel(data)
-        //model: new EditModel(data)
+        model: new DepModel(model.toJSON()),
       });
+
+      App.EditView.model.set('editModel', model);
       
-      $app.html(App.EditView.$el);
+      $edit.html(App.EditView.$el).show();
+
+      App.Vent.on('edit:save', function (model, changes) {
+
+        App.Router.navigate('/', {trigger:true});
+      });
     } else {
       App.Router.navigate('/', {trigger:true});
     }
@@ -101,6 +116,8 @@ App.Vent.bind('edit:show', function (data) {
 
 $(function () {
   $app = $('#app');
+  $tree = $('#tree');
+  $edit = $('#edit');
 
   App.Router = new Router({
     controller: App.Controller

@@ -12,10 +12,11 @@ var DepModel = Backbone.Model.extend({
     depsCollection: null,
   },
 
-  initialize: function () {
+  initialize: function (options) {
     this.createDeps();
 
     this.on('removeDeps', function (deps) {
+      console.log('remove deps', deps);
       this.removeDeps(deps);
     }, this);
 

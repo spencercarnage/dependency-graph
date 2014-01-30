@@ -4,6 +4,7 @@ var EditModel = require('../models/edit');
 var EditDepsModel = require('../models/edit-deps');
 var EditDepsView = require('./edit-deps');
 var DepModel = require('../models/dependency');
+require('../../vendor/jquery.validate');
 
 var EditView = Backbone.View.extend({
   className: 'edit-view',
@@ -12,6 +13,8 @@ var EditView = Backbone.View.extend({
     'click .close': 'close',
     'keyup #filter': 'filter'
   },
+
+  validator: null,
 
   initialize: function () {
     this.render(); 
@@ -24,13 +27,19 @@ var EditView = Backbone.View.extend({
   render: function () {
     this.$el.html(this.template(this.model.toJSON()));
 
-    var deps = this.model.get('deps');
+    var deps = this.model.get('depsCollection');
+    var self = this;
 
     if (typeof deps !== 'undefined') {
-      _.each(deps, function (dep, i) {
+      _.each(deps.models, function (depModel, i) {
+        var cid = depModel.cid;
+
+        var editDepsModel = new DepModel(depModel.toJSON());
+        editDepsModel.set('depCid', depModel.cid);
+
         var editDepsView = new EditDepsView({
-          id: dep.name + '-' + dep.version.replace(/\./g, '-'),
-          model: new DepModel(dep)
+          id: depModel.get('name') + '-' + depModel.get('version').replace(/\./g, '-'),
+          model: editDepsModel
         });
         
         editDepsView.$el.appendTo(this.$el.find('.edit-deps'));
@@ -38,17 +47,40 @@ var EditView = Backbone.View.extend({
         this.depsViews.push(editDepsView);
       }, this);
     }
+
+    this.$('form').validate({
+      submitHandler: function (form) {
+        var depsCollection = self.model.get('depsCollection');
+        var depModelsToDelete = [];
+        var changes = {};
+
+        _.each(self.$('input[type="checkbox"]:checked'), function (input) {
+          depModelsToDelete.push(depsCollection.get($(input).attr('data-dep-cid')));
+        });
+
+        _.each($(form).serializeArray(), function (item) {
+          if (item.name === 'name' || item.name === 'version') {
+            changes[item.name] = item.value;
+          }
+        });
+
+        if (depModelsToDelete.length) {
+          self.model.get('editModel').trigger('removeDeps', depModelsToDelete);
+        }
+
+        self.model.get('editModel').set(changes);
+        App.Vent.trigger('edit:save', self.model, changes);
+      }
+    });
   },
 
   close: function (event) {
     if (this.depsViews.length) {
       _.each(this.depsViews, function (dep) {
-        console.log('close', dep.$el.html());
         dep.remove();
       }, this);
     }
 
-    console.log('close', this.model.get('name'));
     this.remove();
 
     App.Router.navigate('', {trigger:true});

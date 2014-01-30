@@ -8,12 +8,12 @@
 
     <div>
       <label for="name">Name:</label>
-      <input type="text" id="name" name="name" value="{{name}}">
+      <input type="text" id="name" name="name" class="required" value="{{name}}">
     </div>
       
     <div>
       <label for="version">Version:</label>
-      <input type="text" id="version" name="version" value="{{version}}">
+      <input type="text" id="version" name="version" class="required" value="{{version}}">
     </div>
   </fieldset>
 
@@ -22,14 +22,14 @@
 
     <div>
       <label for="filter">Filter:</label>
-      <input type="text" id="filter" name="filter">
+      <input type="text" id="filter" name="filter" autocomplete="off">
     </div>
       
     <ul class="edit-deps">
     </ul>
 
     <div>
-      <label for="add">Add:</label>
+      <label for="add-name">Add:</label>
       <input type="text" id="add" name="add">
     </div>
   </fieldset>

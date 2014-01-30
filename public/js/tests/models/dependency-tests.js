@@ -139,8 +139,6 @@ describe('Dependency Model', function () {
     this.mootools.trigger('addDeps', {name: 'MooTools More', version: '0.5.0'});
                         
     assert.isNotNull(this.mootools.get('depsCollection'));
-    console.log(this.mootools.get('deps'));
-    console.log(this.mootools.get('depsCollection').models.length);
     assert.equal(this.mootools.get('depsCollection').models.length, 1);
   });
 });
