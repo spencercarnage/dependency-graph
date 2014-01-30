@@ -41,7 +41,10 @@ describe('Branch View', function () {
       $('<div>').append(this.mootoolsBranch.$el.clone()).html(),
       '<ul class="dependency-branch">' + 
         '<li class="dependency-leaf">' +
-          '<a href="/edit" class="edit-dep">mootools 1.4.5</a>' +
+          '<a href="/edit" class="edit-dep">' +
+            '<span class="dep-name">mootools</span> ' +
+            '<span class="dep-version">1.4.5</span>' + 
+          '</a>' +
         '</li>' +
       '</ul>',
       "Assert branch markup"
@@ -54,13 +57,22 @@ describe('Branch View', function () {
       '<ul class="dependency-branch">' +
         '<li class="dependency-leaf">' +
           '<button class="view-deps">view dependencies</button>' +
-          '<a href="/edit" class="edit-dep">backbone 1.0.0</a>' +
+          '<a href="/edit" class="edit-dep">' +
+            '<span class="dep-name">backbone</span> ' +
+            '<span class="dep-version">1.0.0</span>' + 
+          '</a>' +
           '<ul class="dependency-branch">' +
             '<li class="dependency-leaf">' +
-              '<a href="/edit" class="edit-dep">underscore 1.5.0</a>' +
+              '<a href="/edit" class="edit-dep">' +
+                '<span class="dep-name">underscore</span> ' +
+                '<span class="dep-version">1.5.0</span>' + 
+              '</a>' +
             '</li>' + 
             '<li class="dependency-leaf">' +
-              '<a href="/edit" class="edit-dep">jquery 1.8.0</a>' +
+              '<a href="/edit" class="edit-dep">' +
+                '<span class="dep-name">jquery</span> ' +
+                '<span class="dep-version">1.8.0</span>' + 
+              '</a>' +
             '</li>' + 
           '</ul>' + 
         '</li>' +

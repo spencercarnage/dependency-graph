@@ -9,9 +9,7 @@ _.templateSettings = {
 window.Backbone = require('backbone');
 Backbone.$ = window.$;
 
-var AppView = require('./views/app');
 var DepTreeView = require('./views/dependency-branch');
-var Leaves = require('./collections/leaves');
 var DepModel = require('./models/dependency');
 var EditView = require('./views/edit');
 var EditModel = require('./models/edit');
@@ -44,18 +42,6 @@ var Router = Backbone.Router.extend({
   },
 
   index: function () {
-    //var treeCollection = new TreeNodeCollection(dependenciesData);
-
-    //var treeview = new treeroot({
-    //  collection: treecollection
-    //});
-
-    //treeview.render();
-    //
-    //$app.html(treeview.$el);
-
-    //app.treeview = treeview;
-
     App.Vent.off('edit:save');
 
     if (typeof App.Tree === 'undefined') {
@@ -64,8 +50,6 @@ var Router = Backbone.Router.extend({
       var depTree = new DepTreeView({
         leavesCollection: branches
       });
-
-      depTree.render();
 
       App.Tree = depTree;
 

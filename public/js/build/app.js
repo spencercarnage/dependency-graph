@@ -11984,9 +11984,7 @@ _.templateSettings = {
 window.Backbone = require('backbone');
 Backbone.$ = window.$;
 
-var AppView = require('./views/app');
 var DepTreeView = require('./views/dependency-branch');
-var Leaves = require('./collections/leaves');
 var DepModel = require('./models/dependency');
 var EditView = require('./views/edit');
 var EditModel = require('./models/edit');
@@ -12019,18 +12017,6 @@ var Router = Backbone.Router.extend({
   },
 
   index: function () {
-    //var treeCollection = new TreeNodeCollection(dependenciesData);
-
-    //var treeview = new treeroot({
-    //  collection: treecollection
-    //});
-
-    //treeview.render();
-    //
-    //$app.html(treeview.$el);
-
-    //app.treeview = treeview;
-
     App.Vent.off('edit:save');
 
     if (typeof App.Tree === 'undefined') {
@@ -12039,8 +12025,6 @@ var Router = Backbone.Router.extend({
       var depTree = new DepTreeView({
         leavesCollection: branches
       });
-
-      depTree.render();
 
       App.Tree = depTree;
 
@@ -12101,7 +12085,7 @@ $(function () {
   Backbone.history.start({pushState: true});
 });
 
-},{"./collections/dependencies":5,"./collections/leaves":6,"./models/dependency":8,"./models/edit":10,"./views/app":11,"./views/dependency-branch":12,"./views/edit":15,"backbone":1,"jquery":2,"underscore":3}],5:[function(require,module,exports){
+},{"./collections/dependencies":5,"./models/dependency":7,"./models/edit":9,"./views/dependency-branch":10,"./views/edit":13,"backbone":1,"jquery":2,"underscore":3}],5:[function(require,module,exports){
 var _ = require('underscore');
 var Backbone = require('backbone');
 var DepModel = require('../models/dependency');
@@ -12112,14 +12096,7 @@ var DependenciesCollection = Backbone.Collection.extend({
 
 module.exports = DependenciesCollection;
 
-},{"../models/dependency":8,"backbone":1,"underscore":3}],6:[function(require,module,exports){
-var DepModel = require('../models/dependency');
-
-module.exports = Backbone.Collection.extend({
-  model: DepModel
-});
-
-},{"../models/dependency":8}],7:[function(require,module,exports){
+},{"../models/dependency":7,"backbone":1,"underscore":3}],6:[function(require,module,exports){
 module.exports = {
   renderDependency: function (DepModel, DepView, parentModel, parentView) {
     var graphItemView = new DepView({
@@ -12131,7 +12108,7 @@ module.exports = {
   }
 };
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 //var DependenciesCollection = require('../collections/dependencies');
@@ -12197,7 +12174,7 @@ var DepModel = Backbone.Model.extend({
 module.exports = DepModel;
 
 
-},{"backbone":1,"underscore":3}],9:[function(require,module,exports){
+},{"backbone":1,"underscore":3}],8:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -12207,7 +12184,7 @@ var EditDepsModel = Backbone.Model.extend({
 
 module.exports = EditDepsModel;
 
-},{"backbone":1,"underscore":3}],10:[function(require,module,exports){
+},{"backbone":1,"underscore":3}],9:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -12217,26 +12194,7 @@ var EditModel = Backbone.Model.extend({
 
 module.exports = EditModel;
 
-},{"backbone":1,"underscore":3}],11:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
-var DepTreeView = require('./dependency-branch');
-var DepModel = require('../models/dependency');
-
-var AppView = Backbone.View.extend({
-  el: '#app',
-
-  initialize: function () {
-    this.render();
-  },
-
-  render: function () {
-  }
-});
-
-module.exports = AppView;
-
-},{"../models/dependency":8,"./dependency-branch":12,"backbone":1,"underscore":3}],12:[function(require,module,exports){
+},{"backbone":1,"underscore":3}],10:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var LeafView= require('./dependency-leaf');
@@ -12290,7 +12248,7 @@ module.exports = Backbone.View.extend({
   }
 });
 
-},{"../models/dependency":8,"./dependency-leaf":13,"backbone":1,"underscore":3}],13:[function(require,module,exports){
+},{"../models/dependency":7,"./dependency-leaf":11,"backbone":1,"underscore":3}],11:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var renderDepMixin = require('../mixins/render-dependencies');
@@ -12401,7 +12359,7 @@ _.extend(LeafView.prototype, renderDepMixin);
 
 module.exports = LeafView;
 
-},{"../mixins/render-dependencies":7,"../models/dependency":8,"./dependency-branch":12,"backbone":1,"underscore":3}],14:[function(require,module,exports){
+},{"../mixins/render-dependencies":6,"../models/dependency":7,"./dependency-branch":10,"backbone":1,"underscore":3}],12:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -12423,7 +12381,7 @@ var EditDepsView = Backbone.View.extend({
 
 module.exports = EditDepsView;
 
-},{"backbone":1,"underscore":3}],15:[function(require,module,exports){
+},{"backbone":1,"underscore":3}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var EditModel = require('../models/edit');
@@ -12541,7 +12499,7 @@ var EditView = Backbone.View.extend({
 
 module.exports = EditView;
 
-},{"../../vendor/jquery.validate":16,"../models/dependency":8,"../models/edit":10,"../models/edit-deps":9,"./edit-deps":14,"backbone":1,"underscore":3}],16:[function(require,module,exports){
+},{"../../vendor/jquery.validate":14,"../models/dependency":7,"../models/edit":9,"../models/edit-deps":8,"./edit-deps":12,"backbone":1,"underscore":3}],14:[function(require,module,exports){
 /*!
  * jQuery Validation Plugin 1.11.1
  *
