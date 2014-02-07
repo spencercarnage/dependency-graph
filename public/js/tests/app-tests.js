@@ -9,3 +9,4 @@ _.templateSettings = {
 
 require('./models/dependency-tests');
 require('./views/dependency-branch-tests');
+require('./views/edit-tests');

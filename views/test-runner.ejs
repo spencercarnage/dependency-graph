@@ -9,6 +9,17 @@
 
   <div id="fixtures" style="display: none; visibility: hidden;"></div>
 
+  <script type="text/template" id="tree-template">
+    <%- include templates/tree.ejs %>
+  </script>
+
+  <script type="text/template" id="edit-template">
+    <%- include templates/edit.ejs %>
+  </script>
+
+  <script type="text/template" id="edit-deps-template">
+    <%- include templates/edit-deps.ejs %>
+  </script>
   <script src="/jquery/dist/jquery.min.js"></script>
   <script src="/mocha/mocha.js"></script>
   <script src="/chai/chai.js"></script>

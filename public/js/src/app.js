@@ -74,10 +74,12 @@ function Controller() {
       $tree.hide();
 
       App.EditView = new EditView({
-        model: new DepModel(model.toJSON()),
+        model: new DepModel(_.extend({editModel: model}, model.toJSON()))
       });
 
+      console.log('model we are editing', model.cid);
       App.EditView.model.set('editModel', model);
+      console.log('app edit view model', App.EditView.model.cid);
       
       $edit.html(App.EditView.$el).show();
 

@@ -10,13 +10,18 @@ var DepModel = Backbone.Model.extend({
     isChild: false,
     parentCid: null,
     depsCollection: null,
+    version: '0.0.0'
   },
 
   initialize: function (options) {
     this.createDeps();
 
     this.on('removeDeps', function (deps) {
-      console.log('remove deps', deps);
+      console.log('model removedeps', deps);
+      var self = this;
+      setTimeout(function () {
+        console.log(self.get('depsCollection'));
+      }, 2000);
       this.removeDeps(deps);
     }, this);
 
@@ -38,7 +43,9 @@ var DepModel = Backbone.Model.extend({
    * Remove dependencies to the model's dependencies collection
    */
   removeDeps: function (deps) {
+    console.log('remove me', deps);
     this.get('depsCollection').remove(deps);
+    console.log(this.get('depsCollection').models.length);
     this.set('deps', this.cleanDeps());
   },
 

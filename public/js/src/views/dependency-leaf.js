@@ -17,10 +17,31 @@ var LeafView = Backbone.View.extend({
 
   leafViews: [],
 
-  branchViews: null,
+  branchView: null,
 
   initialize: function () {
     this.render();
+
+    this.model.on('change:name', function (model, name) {
+      this.$('.dep-name').eq(0).html(name);
+    }, this);
+
+    this.model.on('change:version', function (model, version) {
+      this.$('.dep-version').eq(0).html(version);
+    }, this);
+
+    this.model.on('removeDeps', function (deps) {
+      console.log('view remove deps');
+      this.render();
+    }, this);
+
+    this.model.on('addDeps', function () {
+      this.render();
+    }, this);
+
+    this.model.on('edit:save', function (changes) {
+      this.model.set(changes);
+    }, this);
 
     return this;
   },
@@ -51,25 +72,8 @@ var LeafView = Backbone.View.extend({
           model: new DepModel(leafModel.toJSON())
         });
 
-        console.log(leafView.model.cid);
-
         leafView.$el.appendTo(branchView.$el);
-
-        leafView.model.on('change:name', function (model, name) {
-          this.$('.dep-name').html(name);
-        }, leafView);
-
-        leafView.model.on('change:version', function (model, version) {
-          this.$('.dep-version').html(version);
-        }, leafView);
-
-        leafView.model.on('removeDeps', function (deps) {
-          branchView.model.removeDeps(deps);
-        }, leafView);
-
-        leafView.model.on('edit:save', function (changes) {
-          this.model.set(changes);
-        }, leafView);
+        leafView.branchView = branchView;
 
         this.leafViews.push(leafView);
       }, this);
