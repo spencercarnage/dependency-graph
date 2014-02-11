@@ -58,15 +58,14 @@ var EditView = Backbone.View.extend({
     });
 
     if (addValue) {
-      this.model.get('editModel').trigger('addDeps', {name: addValue});
+      App.Vent.trigger('edit:addDeps', {name: addValue});
     }
 
     if (depModelsToDelete.length) {
-      this.model.get('editModel').trigger('removeDeps', depModelsToDelete);
+      App.Vent.trigger('edit:removeDeps', depModelsToDelete);
     }
 
-    this.model.get('editModel').set(changes);
-    App.Vent.trigger('edit:save', this.model, changes);
+    App.Vent.trigger('edit:save', changes);
 
   },
 
@@ -84,7 +83,6 @@ var EditView = Backbone.View.extend({
       var cid = depModel.cid;
       console.log('dep cid', cid);
       var editDepsModel = depModel;
-      //var editDepsModel = new DepModel(depModel.toJSON());
       editDepsModel.set('depCid', cid);
 
       var editDepsView = new EditDepsView({

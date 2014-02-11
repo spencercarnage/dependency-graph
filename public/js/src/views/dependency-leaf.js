@@ -1,6 +1,5 @@
 var Backbone = require('backbone');
 var _ = require('underscore');
-var renderDepMixin = require('../mixins/render-dependencies');
 var DepModel = require('../models/dependency');
 
 var LeafView = Backbone.View.extend({
@@ -31,7 +30,6 @@ var LeafView = Backbone.View.extend({
     }, this);
 
     this.model.on('removeDeps', function (deps) {
-      console.log('view remove deps');
       this.render();
     }, this);
 
@@ -107,7 +105,5 @@ var LeafView = Backbone.View.extend({
     App.Vent.trigger('edit:show', this.model);
   }
 });
-
-_.extend(LeafView.prototype, renderDepMixin);
 
 module.exports = LeafView;

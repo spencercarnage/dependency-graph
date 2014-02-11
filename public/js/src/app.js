@@ -43,6 +43,8 @@ var Router = Backbone.Router.extend({
 
   index: function () {
     App.Vent.off('edit:save');
+    App.Vent.off('edit:addDeps');
+    App.Vent.off('edit:removeDeps');
 
     if (typeof App.Tree === 'undefined') {
       var branches = new DependenciesCollection(dependenciesData);
@@ -77,14 +79,21 @@ function Controller() {
         model: new DepModel(_.extend({editModel: model}, model.toJSON()))
       });
 
-      console.log('model we are editing', model.cid);
       App.EditView.model.set('editModel', model);
-      console.log('app edit view model', App.EditView.model.cid);
       
       $edit.html(App.EditView.$el).show();
 
-      App.Vent.on('edit:save', function (model, changes) {
+      App.Vent.on('edit:addDeps', function (dep) {
+        model.trigger('addDeps', dep);
+      });
 
+      App.Vent.on('edit:removeDeps', function (deps) {
+        model.trigger('removeDeps', deps);
+      });
+
+      App.Vent.on('edit:save', function (changes) {
+        console.log(changes);
+        model.set(changes);
         App.Router.navigate('/', {trigger:true});
       });
     } else {
