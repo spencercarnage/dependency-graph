@@ -47,15 +47,14 @@ var LeafView = Backbone.View.extend({
   render: function () {
     var depsCollection = this.model.get('depsCollection');
 
-    // Require the branch view here so we don't have issues with circular
-    // deps returning empty objects
-
     this.$el.html(this.template(this.model.toJSON()));
 
+    // Require the branch view here so we don't have issues with circular
+    // deps returning empty objects
     if (depsCollection.length) {
       var DepBranchView = require('./dependency-branch');
 
-      this.$el.prepend('<button class="view-deps">view dependencies</button>');
+      //this.$el.prepend('<button class="view-deps">view dependencies</button>');
 
       var branchView = new DepBranchView({
         model: new DepModel(this.model.toJSON())

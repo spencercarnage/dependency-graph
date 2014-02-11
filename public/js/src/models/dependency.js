@@ -1,6 +1,5 @@
 var Backbone = require('backbone');
 var _ = require('underscore');
-//var DependenciesCollection = require('../collections/dependencies');
 
 var DepModel = Backbone.Model.extend({
   url: '/api/dependencies',

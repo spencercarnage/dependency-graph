@@ -56,7 +56,6 @@ describe('Branch View', function () {
       $('<div>').append(this.backboneBranch.$el.clone()).html(),
       '<ul class="dependency-branch">' +
         '<li class="dependency-leaf">' +
-          '<button class="view-deps">view dependencies</button>' +
           '<a href="/edit" class="edit-dep">' +
             '<span class="dep-name">backbone</span> ' +
             '<span class="dep-version">1.0.0</span>' + 

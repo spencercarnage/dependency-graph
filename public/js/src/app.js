@@ -22,10 +22,6 @@ var $edit;
 var $app;
 window.App = {};
 
-App.Branches = [];
-App.DepTreeViews = [];
-App.TreeViews = [];
-
 App.Vent = _.extend({}, Backbone.Events);
 
 var Router = Backbone.Router.extend({
@@ -47,10 +43,10 @@ var Router = Backbone.Router.extend({
     App.Vent.off('edit:removeDeps');
 
     if (typeof App.Tree === 'undefined') {
-      var branches = new DependenciesCollection(dependenciesData);
-
       var depTree = new DepTreeView({
-        leavesCollection: branches
+        leavesCollection: new Backbone.Collection(dependenciesData, {
+          model: DepModel
+        })
       });
 
       App.Tree = depTree;
@@ -92,7 +88,6 @@ function Controller() {
       });
 
       App.Vent.on('edit:save', function (changes) {
-        console.log(changes);
         model.set(changes);
         App.Router.navigate('/', {trigger:true});
       });

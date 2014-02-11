@@ -8490,7 +8490,6 @@ module.exports = Backbone.Collection.extend({
 },{"../models/dependency":38}],38:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
-//var DependenciesCollection = require('../collections/dependencies');
 
 var DepModel = Backbone.Model.extend({
   url: '/api/dependencies',
@@ -8558,23 +8557,13 @@ module.exports = DepModel;
 var Backbone = require('backbone');
 var _ = require('underscore');
 
-var EditDepsModel = Backbone.Model.extend({
-
-});
-
-module.exports = EditDepsModel;
-
-},{"backbone":1,"underscore":35}],40:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
-
 var EditModel = Backbone.Model.extend({
 
 });
 
 module.exports = EditModel;
 
-},{"backbone":1,"underscore":35}],41:[function(require,module,exports){
+},{"backbone":1,"underscore":35}],40:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var LeafView= require('./dependency-leaf');
@@ -8628,7 +8617,7 @@ module.exports = Backbone.View.extend({
   }
 });
 
-},{"../models/dependency":38,"./dependency-leaf":42,"backbone":1,"underscore":35}],42:[function(require,module,exports){
+},{"../models/dependency":38,"./dependency-leaf":41,"backbone":1,"underscore":35}],41:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var DepModel = require('../models/dependency');
@@ -8678,15 +8667,14 @@ var LeafView = Backbone.View.extend({
   render: function () {
     var depsCollection = this.model.get('depsCollection');
 
-    // Require the branch view here so we don't have issues with circular
-    // deps returning empty objects
-
     this.$el.html(this.template(this.model.toJSON()));
 
+    // Require the branch view here so we don't have issues with circular
+    // deps returning empty objects
     if (depsCollection.length) {
       var DepBranchView = require('./dependency-branch');
 
-      this.$el.prepend('<button class="view-deps">view dependencies</button>');
+      //this.$el.prepend('<button class="view-deps">view dependencies</button>');
 
       var branchView = new DepBranchView({
         model: new DepModel(this.model.toJSON())
@@ -8739,7 +8727,7 @@ var LeafView = Backbone.View.extend({
 
 module.exports = LeafView;
 
-},{"../models/dependency":38,"./dependency-branch":41,"backbone":1,"underscore":35}],43:[function(require,module,exports){
+},{"../models/dependency":38,"./dependency-branch":40,"backbone":1,"underscore":35}],42:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -8761,11 +8749,10 @@ var EditDepsView = Backbone.View.extend({
 
 module.exports = EditDepsView;
 
-},{"backbone":1,"underscore":35}],44:[function(require,module,exports){
+},{"backbone":1,"underscore":35}],43:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 var EditModel = require('../models/edit');
-var EditDepsModel = require('../models/edit-deps');
 var EditDepsView = require('./edit-deps');
 var DepModel = require('../models/dependency');
 require('../../vendor/jquery.validate');
@@ -8830,7 +8817,6 @@ var EditView = Backbone.View.extend({
     }
 
     App.Vent.trigger('edit:save', changes);
-
   },
 
   removeDependencies: function () {
@@ -8844,14 +8830,11 @@ var EditView = Backbone.View.extend({
     this.removeDependencies();
 
     _.each(models, function (depModel, i) {
-      var cid = depModel.cid;
-      console.log('dep cid', cid);
-      var editDepsModel = depModel;
-      editDepsModel.set('depCid', cid);
+      depModel.set('depCid', depModel.cid);
 
       var editDepsView = new EditDepsView({
         id: depModel.get('name') + '-' + depModel.get('version').replace(/\./g, '-'),
-        model: editDepsModel
+        model: depModel
       });
       
       editDepsView.$el.appendTo(this.$el.find('.edit-deps'));
@@ -8873,7 +8856,7 @@ var EditView = Backbone.View.extend({
   },
 
   filter: function (event) {
-    var depsCollection = this.model.get('depsCollection');
+    var depsCollection = this.model.get('editModel').get('depsCollection');
     var filterValue = this.$el.find('#filter').val().trim().toLowerCase();
     var filterValueRE = new RegExp(filterValue);
     var results = [];
@@ -8892,7 +8875,7 @@ var EditView = Backbone.View.extend({
 
 module.exports = EditView;
 
-},{"../../vendor/jquery.validate":50,"../models/dependency":38,"../models/edit":40,"../models/edit-deps":39,"./edit-deps":43,"backbone":1,"underscore":35}],45:[function(require,module,exports){
+},{"../../vendor/jquery.validate":49,"../models/dependency":38,"../models/edit":39,"./edit-deps":42,"backbone":1,"underscore":35}],44:[function(require,module,exports){
 window._ = require('underscore');
 window.Backbone = require('backbone');
 Backbone.$ = jQuery;
@@ -8906,7 +8889,7 @@ require('./models/dependency-tests');
 require('./views/dependency-branch-tests');
 require('./views/edit-tests');
 
-},{"./models/dependency-tests":47,"./views/dependency-branch-tests":48,"./views/edit-tests":49,"backbone":1,"underscore":35}],46:[function(require,module,exports){
+},{"./models/dependency-tests":46,"./views/dependency-branch-tests":47,"./views/edit-tests":48,"backbone":1,"underscore":35}],45:[function(require,module,exports){
 module.exports = {
   mootools: {name: 'mootools', version: '1.4.5'},
   backbone: {
@@ -8919,7 +8902,7 @@ module.exports = {
   }
 };
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var assert = require('chai').assert;
 var DependenciesCollection = require('../../src/collections/dependencies');
 var DepModel = require('../../src/models/dependency');
@@ -9065,7 +9048,7 @@ describe('Dependency Model', function () {
   });
 });
 
-},{"../../src/collections/dependencies":36,"../../src/models/dependency":38,"chai":5}],48:[function(require,module,exports){
+},{"../../src/collections/dependencies":36,"../../src/models/dependency":38,"chai":5}],47:[function(require,module,exports){
 var assert = require('chai').assert;
 var DepModel = require('../../src/models/dependency');
 var DepBranchView = require('../../src/views/dependency-branch');
@@ -9124,7 +9107,6 @@ describe('Branch View', function () {
       $('<div>').append(this.backboneBranch.$el.clone()).html(),
       '<ul class="dependency-branch">' +
         '<li class="dependency-leaf">' +
-          '<button class="view-deps">view dependencies</button>' +
           '<a href="/edit" class="edit-dep">' +
             '<span class="dep-name">backbone</span> ' +
             '<span class="dep-version">1.0.0</span>' + 
@@ -9151,7 +9133,7 @@ describe('Branch View', function () {
 });
 
 
-},{"../../src/collections/leaves":37,"../../src/models/dependency":38,"../../src/views/dependency-branch":41,"../../src/views/dependency-leaf":42,"chai":5}],49:[function(require,module,exports){
+},{"../../src/collections/leaves":37,"../../src/models/dependency":38,"../../src/views/dependency-branch":40,"../../src/views/dependency-leaf":41,"chai":5}],48:[function(require,module,exports){
 var assert = require('chai').assert;
 var libsFixture = require('../../tests/fixtures/libs');
 var EditView = require('../../src/views/edit');
@@ -9242,7 +9224,7 @@ describe('Edit View tests', function () {
   });
 });
 
-},{"../../src/models/dependency":38,"../../src/models/edit":40,"../../src/views/edit":44,"../../tests/fixtures/libs":46,"chai":5,"underscore":35}],50:[function(require,module,exports){
+},{"../../src/models/dependency":38,"../../src/models/edit":39,"../../src/views/edit":43,"../../tests/fixtures/libs":45,"chai":5,"underscore":35}],49:[function(require,module,exports){
 /*!
  * jQuery Validation Plugin 1.11.1
  *
@@ -10475,4 +10457,4 @@ $.format = $.validator.format;
   });
 }(jQuery));
 
-},{}]},{},[45])
+},{}]},{},[44])

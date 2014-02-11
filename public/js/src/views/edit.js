@@ -1,7 +1,6 @@
 var Backbone = require('backbone');
 var _ = require('underscore');
 var EditModel = require('../models/edit');
-var EditDepsModel = require('../models/edit-deps');
 var EditDepsView = require('./edit-deps');
 var DepModel = require('../models/dependency');
 require('../../vendor/jquery.validate');
@@ -66,7 +65,6 @@ var EditView = Backbone.View.extend({
     }
 
     App.Vent.trigger('edit:save', changes);
-
   },
 
   removeDependencies: function () {
@@ -80,14 +78,11 @@ var EditView = Backbone.View.extend({
     this.removeDependencies();
 
     _.each(models, function (depModel, i) {
-      var cid = depModel.cid;
-      console.log('dep cid', cid);
-      var editDepsModel = depModel;
-      editDepsModel.set('depCid', cid);
+      depModel.set('depCid', depModel.cid);
 
       var editDepsView = new EditDepsView({
         id: depModel.get('name') + '-' + depModel.get('version').replace(/\./g, '-'),
-        model: editDepsModel
+        model: depModel
       });
       
       editDepsView.$el.appendTo(this.$el.find('.edit-deps'));
@@ -109,7 +104,7 @@ var EditView = Backbone.View.extend({
   },
 
   filter: function (event) {
-    var depsCollection = this.model.get('depsCollection');
+    var depsCollection = this.model.get('editModel').get('depsCollection');
     var filterValue = this.$el.find('#filter').val().trim().toLowerCase();
     var filterValueRE = new RegExp(filterValue);
     var results = [];
